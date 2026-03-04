@@ -11,7 +11,7 @@ const registerSchema = z.object({
   name: z.string().min(2).max(120),
   email: z.string().email(),
   password: z.string().min(6).max(100),
-  role: z.enum(["patient", "secretary"]).optional(),
+  role: z.enum(["user", "patient", "secretary"]).optional(),
 });
 
 const loginSchema = z.object({
@@ -27,19 +27,26 @@ router.post("/register", async (req, res) => {
   }
 
   const { name, email, password, role } = parsed.data;
-  const existing = await dbGet("SELECT id FROM users WHERE email = ?", [email]);
+  const existing = await dbGet("SELECT id FROM usuario WHERE email = ?", [email]);
   if (existing) {
     res.status(409).json({ message: "Email already in use" });
     return;
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
-  const userRole = role || "patient";
+  const userRole = role || "user";
 
   const result = await dbRun(
-    "INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)",
+    "INSERT INTO usuario (nome, email, password_hash, role) VALUES (?, ?, ?, ?)",
     [name, email, passwordHash, userRole]
   );
+
+  if (userRole !== "secretary") {
+    await dbRun("INSERT OR IGNORE INTO pacientes (id, nome) VALUES (?, ?)", [
+      result.lastID,
+      name,
+    ]);
+  }
 
   res.status(201).json({
     id: result.lastID,
@@ -58,7 +65,7 @@ router.post("/login", async (req, res) => {
 
   const { email, password } = parsed.data;
   const user = await dbGet(
-    "SELECT id, name, email, password_hash, role FROM users WHERE email = ?",
+    "SELECT id, nome AS name, email, password_hash, role FROM usuario WHERE email = ?",
     [email]
   );
 
@@ -87,7 +94,7 @@ router.post("/login", async (req, res) => {
 
 router.get("/me", authRequired, async (req, res) => {
   const user = await dbGet(
-    "SELECT id, name, email, role FROM users WHERE id = ?",
+    "SELECT id, nome AS name, email, role FROM usuario WHERE id = ?",
     [req.user.id]
   );
   res.json(user);

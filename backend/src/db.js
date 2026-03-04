@@ -8,37 +8,46 @@ db.serialize(() => {
   db.run("PRAGMA foreign_keys = ON");
 
   db.run(
-    "CREATE TABLE IF NOT EXISTS users (" +
+    "CREATE TABLE IF NOT EXISTS usuario (" +
       "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-      "name TEXT NOT NULL, " +
+      "nome TEXT NOT NULL, " +
       "email TEXT NOT NULL UNIQUE, " +
       "password_hash TEXT NOT NULL, " +
-      "role TEXT NOT NULL, " +
+      "role TEXT NOT NULL DEFAULT 'user', " +
       "created_at TEXT NOT NULL DEFAULT (datetime('now'))" +
       ")"
   );
 
   db.run(
-    "CREATE TABLE IF NOT EXISTS appointments (" +
+    "CREATE TABLE IF NOT EXISTS pacientes (" +
+      "id INTEGER PRIMARY KEY, " +
+      "nome TEXT NOT NULL, " +
+      "data_nasc TEXT, " +
+      "cpf TEXT, " +
+      "cep TEXT, " +
+      "rua TEXT, " +
+      "bairro TEXT, " +
+      "cidade TEXT, " +
+      "estado TEXT, " +
+      "numero TEXT, " +
+      "FOREIGN KEY (id) REFERENCES usuario(id) ON DELETE CASCADE" +
+      ")"
+  );
+
+  db.run(
+    "CREATE TABLE IF NOT EXISTS consultas (" +
       "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-      "patient_id INTEGER NOT NULL, " +
-      "secretary_id INTEGER, " +
+      "paciente_id INTEGER NOT NULL, " +
+      "usuario_id INTEGER, " +
       "date TEXT NOT NULL, " +
       "time TEXT NOT NULL, " +
-      "reason TEXT, " +
-      "cep TEXT NOT NULL, " +
-      "street TEXT NOT NULL, " +
-      "neighborhood TEXT NOT NULL, " +
-      "city TEXT NOT NULL, " +
-      "state TEXT NOT NULL, " +
-      "number TEXT, " +
-      "complement TEXT, " +
-      "weather_rain INTEGER, " +
-      "weather_summary TEXT, " +
-      "status TEXT NOT NULL DEFAULT 'scheduled', " +
+      "razao TEXT, " +
+      "previsao_chuva INTEGER, " +
+      "clima TEXT, " +
+      "status TEXT NOT NULL DEFAULT 'agendado', " +
       "created_at TEXT NOT NULL DEFAULT (datetime('now')), " +
-      "FOREIGN KEY (patient_id) REFERENCES users(id) ON DELETE CASCADE, " +
-      "FOREIGN KEY (secretary_id) REFERENCES users(id) ON DELETE SET NULL, " +
+      "FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE, " +
+      "FOREIGN KEY (usuario_id) REFERENCES usuario(id) ON DELETE SET NULL, " +
       "UNIQUE(date, time)" +
       ")"
   );

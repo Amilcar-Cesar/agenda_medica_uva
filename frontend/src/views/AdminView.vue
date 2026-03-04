@@ -52,9 +52,9 @@ onMounted(() => {
         </div>
         <select v-model="filterStatus" @change="loadAppointments">
           <option value="">Todos</option>
-          <option value="scheduled">Agendados</option>
-          <option value="completed">Concluidos</option>
-          <option value="canceled">Cancelados</option>
+          <option value="agendado">Agendados</option>
+          <option value="concluido">Concluidos</option>
+          <option value="cancelado">Cancelados</option>
         </select>
       </div>
 
@@ -74,9 +74,9 @@ onMounted(() => {
               :value="appointment.status"
               @change="updateStatus(appointment, $event.target.value)"
             >
-              <option value="scheduled">Agendada</option>
-              <option value="completed">Concluida</option>
-              <option value="canceled">Cancelada</option>
+              <option value="agendado">Agendada</option>
+              <option value="concluido">Concluida</option>
+              <option value="cancelado">Cancelada</option>
             </select>
             <input
               v-model="appointment.secretary_id"

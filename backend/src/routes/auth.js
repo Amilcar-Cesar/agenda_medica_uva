@@ -22,7 +22,9 @@ const loginSchema = z.object({
 router.post("/register", async (req, res) => {
   const parsed = registerSchema.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ message: "Invalid data" });
+    const message = parsed.error.flatten().fieldErrors;
+    console.error("Validation error:", message);
+    res.status(400).json({ message: "Dados inválidos. Verifique os campos." });
     return;
   }
 

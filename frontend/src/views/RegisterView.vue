@@ -14,25 +14,52 @@ const loading = ref(false);
 
 const submit = async () => {
   error.value = "";
+  
+  // Validações no cliente
+  if (!name.value || name.value.length < 2) {
+    error.value = "Nome deve ter pelo menos 2 caracteres";
+    loading.value = false;
+    return;
+  }
+  
+  if (!email.value || !email.value.includes("@")) {
+    error.value = "Email inválido";
+    loading.value = false;
+    return;
+  }
+  
+  if (!password.value || password.value.length < 6) {
+    error.value = "Senha deve ter pelo menos 6 caracteres";
+    loading.value = false;
+    return;
+  }
+  
   loading.value = true;
 
   try {
     await api.post("/api/auth/register", {
-      name: name.value,
-      email: email.value,
+      name: name.value.trim(),
+      email: email.value.trim(),
       password: password.value,
       role: role.value,
     });
 
     const login = await api.post("/api/auth/login", {
-      email: email.value,
+      email: email.value.trim(),
       password: password.value,
     });
 
     setSession(login.data.token, login.data.user);
     router.push(login.data.user.role === "secretary" ? "/admin" : "/dashboard");
   } catch (err) {
-    error.value = "Nao foi possivel registrar.";
+    if (err.response?.data?.message) {
+      error.value = err.response.data.message;
+    } else if (err.message) {
+      error.value = err.message;
+    } else {
+      error.value = "Nao foi possivel registrar.";
+    }
+    console.error("Register error:", err);
   } finally {
     loading.value = false;
   }
